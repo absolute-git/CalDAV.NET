@@ -61,6 +61,11 @@ namespace CalDAV.NET.Internal
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", value);
         }
 
+        internal void SetBearerAuthorization(string token)
+        {
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
         private Request<T> CreateRequest<T>(string uri) where T : Response, new()
         {
             return new Request<T>(new Uri(BaseUri, uri), _client);

@@ -26,10 +26,11 @@ namespace CalDAV.NET.Internal
         public override async Task ParseAsync(HttpResponseMessage message)
         {
             await base.ParseAsync(message);
+            ContentString = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             var data = await message.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
             var content = GetEncoding(message.Content, Encoding.UTF8).GetString(data, 0, data.Length);
-
+            
             if (TryParseDocument(content, out var document) == false || document.Root == null)
             {
                 return;

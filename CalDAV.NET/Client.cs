@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using CalDAV.NET.Interfaces;
 using CalDAV.NET.Internal;
+using Ical.Net;
+using Ical.Net.CalendarComponents;
+using Calendar = CalDAV.NET.Internal.Calendar;
 
 namespace CalDAV.NET
 {
@@ -15,7 +18,9 @@ namespace CalDAV.NET
 
         public string Username { get; }
         public string Password { get; }
+        public string Token { get; }
         public Uri Uri { get; }
+        public string CalendarId { get; set; }
 
         private static readonly CalDAVClient _client = new CalDAVClient();
 
@@ -27,6 +32,31 @@ namespace CalDAV.NET
 
             _client.BaseUri = uri;
             _client.SetAuthorization(Username, Password);
+        }
+
+        public Client(string calendarId, Uri uri, string token)
+        {
+            Uri = uri;
+            Token = token;
+            CalendarId = calendarId;
+            _client.BaseUri = uri;
+            _client.SetBearerAuthorization(Token);
+        }
+
+        public async Task<Ical.Net.Calendar> GetCalendarEventAsync(string eventId)
+        {
+            var result = await _client
+                .Get($"{CalendarId}/events/{eventId}")
+                .SendAsync()
+                .ConfigureAwait(false)
+                ;
+
+            if (result.IsSuccessful == false)
+            {
+                return null;
+            }
+            var calendarWithEvents = Ical.Net.Calendar.Load(result.ContentString);
+            return calendarWithEvents;
         }
 
         public async Task<IEnumerable<ICalendar>> GetCalendarsAsync()

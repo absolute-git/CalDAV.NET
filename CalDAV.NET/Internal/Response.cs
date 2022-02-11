@@ -8,6 +8,7 @@ namespace CalDAV.NET.Internal
     {
         public int StatusCode { get; private set; }
         public string Method { get; private set; }
+        public string ContentString { get; set; }
 
         public Response()
         {
@@ -27,6 +28,13 @@ namespace CalDAV.NET.Internal
             StatusCode = (int) message.StatusCode;
 
             return Task.CompletedTask;
+        }
+
+        public virtual async Task ParseContentStringAsync(HttpResponseMessage message)
+        {
+            Method = message.RequestMessage.Method.Method;
+            StatusCode = (int)message.StatusCode;
+            ContentString = await message.Content.ReadAsStringAsync();
         }
 
         public override string ToString()
